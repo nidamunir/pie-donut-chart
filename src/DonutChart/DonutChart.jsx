@@ -35,7 +35,6 @@ const childData2 = [
   {
     value: 4,
     label: "Label1",
-    children: childData3,
   },
   {
     value: 8,
@@ -46,24 +45,16 @@ const childData2 = [
 
 const data = [
   {
-    value: 2,
-    label: "Label1",
-  },
-  {
-    value: 4,
-    label: "Label1",
-  },
-  {
     value: 6,
-    label: "Label1",
+    label: "Parent0",
   },
   {
     value: 12,
-    label: "Label1",
+    label: "Parent1",
   },
   {
     value: 22,
-    label: "Label1",
+    label: "Parent2",
     children: childData2,
   },
 ];
@@ -95,51 +86,69 @@ export const DonutChart = ({
   innerHoleSize = 30,
 }) => {
   const colors = scaleOrdinal(colorScheme);
-  const [radius, setRadius] = useState(
-    Math.min(width, height + innerHoleSize) / 4
-  );
-
+  const radius = Math.min(width, height) / 4;
   const pieGenerator = pie().sort((a, b) => {
     return a - b;
   });
-  const arcGenerator = arc().innerRadius(innerHoleSize).outerRadius(radius);
+
   const arcs = pieGenerator(getValues(data));
+  const [activeArc, setActiveArc] = useState(null);
 
   const getChildArcs = (
     data,
     parentArc,
     innerRadius = radius + 2,
-    outerRadius = radius + 10
+    outerRadius = radius + 10,
+    isHover
   ) => {
-    const { startAngle, endAngle } = parentArc;
+    const { index, startAngle, endAngle } = parentArc;
+    const innerRadiusUpdated = !isHover ? innerRadius : innerRadius;
+    const outerRadiusUpdated = !isHover ? outerRadius : outerRadius;
+    const padAngle = index === activeArc ? 0 : 0;
 
     const childArcGenerator = arc()
-      .innerRadius(innerRadius)
-      .outerRadius(outerRadius);
+      .innerRadius(innerRadiusUpdated)
+      .outerRadius(outerRadiusUpdated);
     const childPieGenerator = pie()
       .startAngle(startAngle)
       .endAngle(endAngle)
       .sort((a, b) => {
         return a - b;
-      });
+      })
+      .padAngle(padAngle);
     const childArcs = childPieGenerator(getValues(data));
 
     return childArcs.map((currentChild) => {
       const fill = colors(currentChild.index);
+
       const pathDirection = childArcGenerator(currentChild);
       const { children: childs = [] } = data[currentChild.index];
 
       return (
         <>
-          <g key={`${currentChild.index}`}>
-            <path d={pathDirection} fill={fill}></path>
+          <g
+            key={`${currentChild.index}`}
+            // onMouseOver={(event) => {
+            //   console.log("On mouse over in child");
+            //   setActiveArc(index);
+            // }}
+          >
+            <path
+              d={pathDirection}
+              fill={fill}
+              // onMouseOver={(event) => {
+              //   console.log("On mouse over", event);
+              //   setActiveArc(index);
+              // }}
+            ></path>
           </g>
           {childs &&
             getChildArcs(
               childs,
               currentChild,
               outerRadius + 2,
-              outerRadius + 30
+              outerRadius + 30,
+              isHover
             )}
         </>
       );
@@ -155,14 +164,41 @@ export const DonutChart = ({
         >
           {arcs.map((current) => {
             const { index } = current;
+            const arcPadding = index === activeArc ? 0.3 : 0;
+            const innerRadiusUpdated =
+              index === activeArc ? innerHoleSize : innerHoleSize - 10;
+            const outerRadiusUpdated =
+              index === activeArc ? radius : radius - 10;
+            const isHover = index === activeArc;
+            const arcGenerator = arc()
+              .innerRadius(innerRadiusUpdated)
+              .outerRadius(outerRadiusUpdated)
+              .padAngle(arcPadding);
+
             const pathDirection = arcGenerator(current);
             const fill = colors(index);
 
             return (
               <>
-                <g key={`${current.index}`}>
+                <g
+                  key={`${current.index}`}
+                  onMouseOver={(event) => {
+                    setActiveArc(index);
+                    console.log(
+                      "fill",
+                      fill,
+                      "index",
+                      index,
+                      data[index].label
+                    );
+                  }}
+                  onMouseOut={(event) => {
+                    setActiveArc(null);
+                  }}
+                >
                   <path d={pathDirection} fill={fill}></path>
                 </g>
+
                 {data[index].children &&
                   getChildArcs(data[index].children, current)}
               </>
