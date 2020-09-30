@@ -2,57 +2,85 @@ import React, { useEffect, useState } from "react";
 import { pie, arc } from "d3-shape";
 import { scaleOrdinal } from "d3-scale";
 
-const childData4 = [
+const level5Child1 = [
   {
-    value: 4,
+    value: 20,
+    label: "Label1",
+  },
+  {
+    value: 20,
     label: "Label1",
   },
 ];
-const childData3 = [
+
+const level4Child1 = [
+  {
+    value: 40,
+    label: "Label1",
+    // children: level5Child1,
+  },
+  {
+    value: 10,
+    label: "Label1",
+  },
+];
+const level3Child1 = [
   {
     value: 4,
     label: "Level 2 child 0",
   },
 
   {
-    value: 8,
+    value: 6,
     label: "Level 2 child 1",
-    children: childData4,
+    children: level4Child1,
   },
 ];
 
-const childData2 = [
+const level2Child1 = [
   {
-    value: 4,
+    value: 5,
     label: "Level1Child0",
   },
 
   {
-    value: 4,
+    value: 5,
     label: "Level1Child1",
   },
   {
-    value: 8,
+    value: 50,
     label: "Level1Child2",
-    children: childData3,
+    children: level4Child1,
   },
 ];
 
+const level2Child2 = [
+  {
+    value: 5,
+    label: "Level1Child0",
+  },
+
+  {
+    value: 5,
+    label: "Level1Child1",
+  },
+  {
+    value: 10,
+    label: "Level1Child2",
+    children: level4Child1,
+  },
+];
 const data = [
   {
-    value: 6,
+    value: 40,
     label: "Parent0",
-    children: childData3,
+    // children: level2Child2,
   },
+
   {
-    value: 12,
-    label: "Parent1",
-    children: childData4,
-  },
-  {
-    value: 22,
+    value: 60,
     label: "Parent2",
-    children: childData2,
+    children: level2Child1,
   },
 ];
 const colorScheme = [
@@ -90,29 +118,26 @@ export const DonutChart = ({
 
   const arcs = pieGenerator(getValues(data));
   const [activeArc, setActiveArc] = useState(null);
+  const [activeLabel, setActiveLabel] = useState(null);
 
-  // const updatedStartAngle = isArcActive ? startAngle : startAngle;
-  // const updatedEndAngle = isArcActive ? endAngle : endAngle;
-  // if first index
-  // if ((index === childArcs.length - 1) & isArcActive)
-  //   console.log(
-  //     colors(index),
-  //     index,
-  //     "length",
-  //     childArcs.length - 1
-  //   );
   const getChildArcs = (
     data,
     parentArc,
     isArcActive,
     innerRadius,
     outerRadius,
-    isFirstChild
+    isFirstChild,
+    marginFromBasePie
   ) => {
     const { startAngle: pieStart, endAngle: pieEnd } = parentArc;
+    if (!isFirstChild) console.log("childPie", pieStart, pieEnd);
+    const padAngle = isArcActive ? 0.05 : 0;
+    const arcStartAngle = isArcActive ? pieStart + marginFromBasePie : pieStart;
+    const arcEndAngle = isArcActive ? pieEnd - marginFromBasePie : pieEnd;
     const childPieGenerator = pie()
-      .startAngle(pieStart)
-      .endAngle(pieEnd)
+      .startAngle(arcStartAngle)
+      .endAngle(arcEndAngle)
+      .padAngle(padAngle)
       .sort((a, b) => {
         return a - b;
       });
@@ -122,28 +147,34 @@ export const DonutChart = ({
       const { index, startAngle, endAngle } = currentChild;
       const fill = colors(test);
 
-      const arcStartAngle =
-        index === 0 && isArcActive && isFirstChild
-          ? startAngle + 0.175
-          : startAngle;
-      const arcEndAngle =
-        index === childArcs.length - 1 && isArcActive
-          ? endAngle - 0.175
-          : endAngle;
-      const padAngle = isArcActive ? 0.05 : 0;
+      console.log(
+        "updatedarc",
+        arcStartAngle === startAngle,
+        arcStartAngle,
+        startAngle,
+        arcEndAngle == endAngle,
+        arcEndAngle,
+        endAngle
+      );
 
       const childArcGenerator = arc()
         .innerRadius(innerRadius)
-        .outerRadius(outerRadius)
-        .startAngle(arcStartAngle)
-        .endAngle(arcEndAngle)
-        .padAngle(padAngle);
+        .outerRadius(outerRadius);
+
       const pathDirection = childArcGenerator(currentChild);
       const { children: childs = [] } = data[index];
 
       return (
         <>
-          <g key={`${index}`}>
+          <g
+            key={`${index}`}
+            onMouseEnter={() => {
+              setActiveLabel(data[index].value);
+            }}
+            onMouseOut={() => {
+              setActiveLabel(null);
+            }}
+          >
             <path d={pathDirection} fill={fill}></path>
           </g>
           {childs &&
@@ -153,7 +184,8 @@ export const DonutChart = ({
               isArcActive,
               isArcActive ? outerRadius + 10 : outerRadius + 2,
               isArcActive ? outerRadius + 30 : outerRadius + 20,
-              false
+              false,
+              0
             )}
         </>
       );
@@ -162,6 +194,7 @@ export const DonutChart = ({
 
   return (
     <div>
+      <h3>{activeLabel}</h3>
       <svg width={width} height={height}>
         <g
           className="wrapper"
@@ -170,11 +203,20 @@ export const DonutChart = ({
           {arcs.map((currentArc) => {
             const { index, startAngle, endAngle } = currentArc;
             const isArcActive = index === activeArc;
+            const marginFromBasePie = isArcActive ? 0.175 : 0;
             const updatedStartAngle = isArcActive
               ? startAngle + 0.2
               : startAngle;
             const updatedEndAngle = isArcActive ? endAngle - 0.2 : endAngle;
-
+            console.log(
+              "updatedarc",
+              updatedStartAngle === startAngle,
+              updatedStartAngle,
+              startAngle,
+              updatedEndAngle == endAngle,
+              updatedEndAngle,
+              endAngle
+            );
             const arcGenerator = arc()
               .innerRadius(innerHoleSize)
               .outerRadius(radius)
@@ -192,9 +234,11 @@ export const DonutChart = ({
                   key={`${currentArc.index}`}
                   onMouseEnter={() => {
                     setActiveArc(index);
+                    setActiveLabel(data[index].label);
                   }}
                   onMouseOut={() => {
                     setActiveArc(null);
+                    setActiveLabel(null);
                   }}
                 >
                   <path d={pathDirection} fill={fill}></path>
@@ -207,7 +251,8 @@ export const DonutChart = ({
                     isArcActive,
                     innerRadius,
                     outerRadius,
-                    true
+                    true,
+                    marginFromBasePie
                   )}
               </>
             );
