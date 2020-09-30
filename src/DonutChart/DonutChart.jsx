@@ -115,7 +115,15 @@ export const DonutChart = ({
   levelsInnerSpaceOnHover = 10,
   levelsInnerSpace = 2,
 }) => {
-  // 0.2 - 0.05 / 2
+  // TODO: Add Labels
+  // TODO: Define Labels in apis data
+  // TODO: Colors scheme
+  // TODO: Colors in api data
+  // TODO: Improve names
+  // TODO: Add Legends
+  // TODO: Move data to datasets folder
+  // TODO: Add utils
+
   const offsetAdjustment = pieOffsetOnHover - arcPaddingOnHover / 2;
   const colors = scaleOrdinal(colorScheme);
   const radius = Math.min(width, height) / 4;
