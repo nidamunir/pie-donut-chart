@@ -127,15 +127,13 @@ export const DonutChart = ({
   const getChildArcs = ({
     parentArc,
     data,
-    isArcActive,
     radius,
-    isLevelZero,
+    isArcActive,
+    offsetAdjustment = 0,
   }) => {
     const { startAngle, endAngle } = parentArc;
-    const adjustedStart = isLevelZero
-      ? startAngle + offsetAdjustment
-      : startAngle;
-    const adjustedEnd = isLevelZero ? endAngle - offsetAdjustment : endAngle;
+    const adjustedStart = startAngle + offsetAdjustment;
+    const adjustedEnd = endAngle - offsetAdjustment;
     const childPieGenerator = pie()
       .startAngle(adjustedStart)
       .endAngle(adjustedEnd)
@@ -185,7 +183,7 @@ export const DonutChart = ({
 
   return (
     <div>
-      <h3>{activeLabel}</h3>
+      {/* <h3>{activeLabel}</h3> */}
       <svg width={width} height={height}>
         <g
           className="wrapper"
@@ -233,7 +231,7 @@ export const DonutChart = ({
                       inner: innerRadius,
                       outer: outerRadius,
                     },
-                    isLevelZero: true,
+                    offsetAdjustment,
                   })}
               </>
             );
