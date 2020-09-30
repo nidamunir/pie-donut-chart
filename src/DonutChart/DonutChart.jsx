@@ -162,7 +162,7 @@ export const DonutChart = ({
               hover ? outerRadius + 30 : outerRadius + 20,
               padAngle,
               hover,
-              true
+              false
             )}
         </>
       );
