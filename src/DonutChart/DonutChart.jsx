@@ -127,7 +127,8 @@ export const DonutChart = ({
   const getChildArcs = ({
     parentArc,
     data,
-    radius,
+    innerRadius,
+    outerRadius,
     isArcActive,
     offsetAdjustment = 0,
   }) => {
@@ -145,8 +146,8 @@ export const DonutChart = ({
 
     return childArcs.map((currentChildArc) => {
       const childArcGenerator = arc()
-        .innerRadius(radius.inner)
-        .outerRadius(radius.outer);
+        .innerRadius(innerRadius)
+        .outerRadius(outerRadius);
       const arcPath = childArcGenerator(currentChildArc);
 
       const { index } = currentChildArc;
@@ -171,10 +172,8 @@ export const DonutChart = ({
               data: children,
               parentArc: currentChildArc,
               isArcActive,
-              radius: {
-                inner: isArcActive ? radius.outer + 10 : radius.outer + 2,
-                outer: isArcActive ? radius.outer + 30 : radius.outer + 20,
-              },
+              innerRadius: isArcActive ? outerRadius + 10 : outerRadius + 2,
+              outerRadius: isArcActive ? outerRadius + 30 : outerRadius + 20,
             })}
         </>
       );
@@ -227,10 +226,8 @@ export const DonutChart = ({
                     data: data[index].children,
                     parentArc: currentArc,
                     isArcActive,
-                    radius: {
-                      inner: innerRadius,
-                      outer: outerRadius,
-                    },
+                    innerRadius,
+                    outerRadius,
                     offsetAdjustment,
                   })}
               </>
