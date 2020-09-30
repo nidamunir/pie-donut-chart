@@ -111,6 +111,9 @@ export const DonutChart = ({
   innerHoleSize = 50,
   arcPaddingOnHover = 0.05,
   pieOffsetOnHover = 0.2,
+  arcWidth = 20,
+  levelsInnerSpaceOnHover = 10,
+  levelsInnerSpace = 2,
 }) => {
   // 0.2 - 0.05 / 2
   const offsetAdjustment = pieOffsetOnHover - arcPaddingOnHover / 2;
@@ -172,8 +175,12 @@ export const DonutChart = ({
               data: children,
               parentArc: currentChildArc,
               isArcActive,
-              innerRadius: isArcActive ? outerRadius + 10 : outerRadius + 2,
-              outerRadius: isArcActive ? outerRadius + 30 : outerRadius + 20,
+              innerRadius: isArcActive
+                ? outerRadius + levelsInnerSpaceOnHover
+                : outerRadius + 2,
+              outerRadius: isArcActive
+                ? outerRadius + levelsInnerSpaceOnHover + arcWidth
+                : outerRadius + arcWidth,
             })}
         </>
       );
@@ -202,8 +209,12 @@ export const DonutChart = ({
 
             const pathDirection = arcGenerator(currentArc);
             const fill = colors(index);
-            const innerRadius = isArcActive ? radius + 10 : radius + 2;
-            const outerRadius = isArcActive ? radius + 30 : radius + 20;
+            const innerRadius = isArcActive
+              ? radius + levelsInnerSpaceOnHover
+              : radius + levelsInnerSpace;
+            const outerRadius = isArcActive
+              ? radius + levelsInnerSpaceOnHover + arcWidth
+              : radius + arcWidth;
 
             return (
               <>
