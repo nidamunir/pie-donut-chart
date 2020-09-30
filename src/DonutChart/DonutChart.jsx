@@ -101,7 +101,7 @@ const colorScheme = [
   "#FC803B",
 ];
 
-const getValues = (data) => {
+const transformer = (data) => {
   return data.map((dataPoint) => dataPoint.value);
 };
 
@@ -110,73 +110,73 @@ export const DonutChart = ({
   height = 500,
   innerHoleSize = 50,
   arcPaddingOnHover = 0.05,
+  pieOffsetOnHover = 0.2,
 }) => {
+  // 0.2 - 0.05 / 2
+  const offsetAdjustment = pieOffsetOnHover - arcPaddingOnHover / 2;
   const colors = scaleOrdinal(colorScheme);
   const radius = Math.min(width, height) / 4;
   const pieGenerator = pie().sort((a, b) => {
     return a - b;
   });
 
-  const arcs = pieGenerator(getValues(data));
+  const arcs = pieGenerator(transformer(data));
   const [activeArc, setActiveArc] = useState(null);
   const [activeLabel, setActiveLabel] = useState(null);
 
   const getChildArcs = ({
-    data,
     parentArc,
+    data,
     isArcActive,
     radius,
-    marginFromBasePie,
-    arcPaddingOnHover,
+    isLevelZero,
   }) => {
-    const { startAngle: pieStart, endAngle: pieEnd } = parentArc;
-
-    const arcStartAngle = pieStart + marginFromBasePie;
-    const arcEndAngle = pieEnd - marginFromBasePie;
+    const { startAngle, endAngle } = parentArc;
+    const adjustedStart = isLevelZero
+      ? startAngle + offsetAdjustment
+      : startAngle;
+    const adjustedEnd = isLevelZero ? endAngle - offsetAdjustment : endAngle;
     const childPieGenerator = pie()
-      .startAngle(arcStartAngle)
-      .endAngle(arcEndAngle)
+      .startAngle(adjustedStart)
+      .endAngle(adjustedEnd)
       .padAngle(arcPaddingOnHover)
       .sort((a, b) => {
         return a - b;
       });
-    const childArcs = childPieGenerator(getValues(data));
+    const childArcs = childPieGenerator(transformer(data));
 
-    return childArcs.map((currentChild, test) => {
-      const { index } = currentChild;
-      const fill = colors(test);
-
+    return childArcs.map((currentChildArc) => {
       const childArcGenerator = arc()
         .innerRadius(radius.inner)
         .outerRadius(radius.outer);
+      const arcPath = childArcGenerator(currentChildArc);
 
-      const pathDirection = childArcGenerator(currentChild);
-      const { children: childs = [] } = data[index];
+      const { index } = currentChildArc;
+      const fill = colors(index);
+      const { children = [], label } = data[index];
 
       return (
         <>
           <g
-            key={`${index}`}
-            onMouseEnter={() => {
-              setActiveLabel(data[index].value);
-            }}
-            onMouseOut={() => {
-              setActiveLabel(null);
-            }}
+            key={`${index}${label}`}
+            // onMouseEnter={() => {
+            //   setActiveLabel(data[index].value);
+            // }}
+            // onMouseOut={() => {
+            //   setActiveLabel(null);
+            // }}
           >
-            <path d={pathDirection} fill={fill}></path>
+            <path d={arcPath} fill={fill}></path>
           </g>
-          {childs &&
+          {children &&
             getChildArcs({
-              data: childs,
-              parentArc: currentChild,
+              data: children,
+              parentArc: currentChildArc,
               isArcActive,
               radius: {
                 inner: isArcActive ? radius.outer + 10 : radius.outer + 2,
                 outer: isArcActive ? radius.outer + 30 : radius.outer + 20,
               },
-              marginFromBasePie: 0,
-              arcPaddingOnHover,
             })}
         </>
       );
@@ -194,7 +194,6 @@ export const DonutChart = ({
           {arcs.map((currentArc) => {
             const { index, startAngle, endAngle } = currentArc;
             const isArcActive = index === activeArc;
-            const marginFromBasePie = isArcActive ? 0.175 : 0;
             const arcStartAngle = isArcActive ? startAngle + 0.2 : startAngle;
             const arcEndAngle = isArcActive ? endAngle - 0.2 : endAngle;
 
@@ -234,8 +233,7 @@ export const DonutChart = ({
                       inner: innerRadius,
                       outer: outerRadius,
                     },
-                    marginFromBasePie,
-                    arcPaddingOnHover,
+                    isLevelZero: true,
                   })}
               </>
             );
