@@ -124,7 +124,6 @@ export const DonutChart = ({
   // TODO: Move data to datasets folder
   // TODO: Add utils
 
-  const offsetAdjustment = pieOffsetOnHover - arcPaddingOnHover / 2;
   const colors = scaleOrdinal(colorScheme);
   const radius = Math.min(width, height) / 4;
   const pieGenerator = pie().sort((a, b) => {
@@ -143,13 +142,15 @@ export const DonutChart = ({
     isArcActive,
     offsetAdjustment = 0,
   }) => {
-    const { startAngle, endAngle } = parentArc;
+    const { startAngle, endAngle, padAngle } = parentArc;
     const adjustedStart = startAngle + offsetAdjustment;
     const adjustedEnd = endAngle - offsetAdjustment;
+    const adjustedPadAngle = isArcActive ? arcPaddingOnHover : padAngle;
+
     const childPieGenerator = pie()
       .startAngle(adjustedStart)
       .endAngle(adjustedEnd)
-      .padAngle(arcPaddingOnHover)
+      .padAngle(adjustedPadAngle)
       .sort((a, b) => {
         return a - b;
       });
@@ -223,6 +224,9 @@ export const DonutChart = ({
             const outerRadius = isArcActive
               ? radius + levelsInnerSpaceOnHover + arcWidth
               : radius + arcWidth;
+            const offsetAdjustment = isArcActive
+              ? pieOffsetOnHover - arcPaddingOnHover / 2
+              : 0;
 
             return (
               <>
