@@ -55,18 +55,18 @@ export const DonutChart = ({
   const donutInnerGapOnHover = explodeDonut ? 8 : 2;
   const innerHoleSize = pieName ? holeSize : 0;
   // TODO: Add Labels
-  // TODO: Define Labels in apis data
   // TODO: Colors scheme
-  // TODO: Colors in api data
   // TODO: Improve names
   // TODO: Add Legends
   // TODO: Move data to datasets folder
   // TODO: Add utils
+  // TODO: fix percenta sign
+  // TODO: remove opacity
+  // TODO: fix radius calculation
+  //
 
   const colors = scaleOrdinal(colorScheme);
-  // const updatedHeight = height - (levels * arcWidth + levelsInnerSpaceOnHover);
-  // const updatedWidth = width - (levels * arcWidth + levelsInnerSpaceOnHover);
-  const radius = Math.min(height, width) / 5;
+  const radius = Math.min(height, width) / 4;
   const pieGenerator = pie().sort((a, b) => {
     return a - b;
   });
@@ -98,6 +98,12 @@ export const DonutChart = ({
     const childArcs = childPieGenerator(transformer(data));
 
     return childArcs.map((currentChildArc) => {
+      const { index } = currentChildArc;
+      const fill = adjust(color, colorAmount);
+      colorAmount += 30;
+      const { children = [], label, value } = data[index];
+      const percentage = getPercentage(value, data);
+
       const childArcGenerator = arc()
         .innerRadius(innerRadius)
         .outerRadius(outerRadius);
@@ -114,18 +120,10 @@ export const DonutChart = ({
       const labelPosition = labelTextArc.centroid(currentChildArc);
       const linePoints = [lineStart, lineEnd];
 
-      const { index } = currentChildArc;
-
-      const fill = adjust(color, colorAmount);
-      colorAmount += 30;
-      console.log("index", index, -colorAmount);
-      const { children = [], label, value } = data[index];
-      const percentage = getPercentage(value, data);
-
       return (
         <>
           <g key={`${index}${label}`}>
-            <path d={arcPath} fill={fill} opacity={0.8}></path>
+            <path d={arcPath} fill={fill}></path>
           </g>
           {labelStyle === "outside" && !children.length && (
             <g>
