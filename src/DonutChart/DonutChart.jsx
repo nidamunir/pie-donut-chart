@@ -3,17 +3,14 @@ import { pie, arc } from "d3-shape";
 import { scaleOrdinal } from "d3-scale";
 
 const colorScheme = [
-  "#4daf4a",
-  "#377eb8",
   "#ffb822",
   "#00bf8c",
-  "#219ddb",
-  "#ad85cc",
-  "#f95275",
-  "#80B647",
-  "#11AEB4",
-  "#6791D4",
-  "#D36CA1",
+  // "#ad85cc",
+  // "#f95275",
+  // "#80B647",
+  // "#11AEB4",
+  // "#6791D4",
+  // "#D36CA1",
   "#FC803B",
 ];
 
@@ -218,7 +215,7 @@ export const DonutChart = ({
               .endAngle(arcEndAngle);
 
             const pathDirection = arcGenerator(currentArc);
-            const fill = adjust(colors(index), -20);
+            const fill = adjust(colors(index), -80);
             const pieLabelCoordinates = arcGenerator.centroid(currentArc);
 
             // child Arc calculation
