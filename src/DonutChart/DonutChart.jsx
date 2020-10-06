@@ -238,6 +238,9 @@ export const DonutChart = ({
                   onMouseEnter={() => {
                     setActiveArc(index);
                   }}
+                  onMouseOver={() => {
+                    setActiveArc(index);
+                  }}
                   onMouseOut={() => {
                     setActiveArc(null);
                   }}
