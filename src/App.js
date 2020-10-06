@@ -12,9 +12,7 @@ function App() {
         data={dataset2}
         arcWidth={35}
         labelStyle="inside"
-        explodePie={false}
         pieName="test"
-        explodeDonut={true}
       />
     </div>
   );

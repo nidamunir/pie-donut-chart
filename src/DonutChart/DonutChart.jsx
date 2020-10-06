@@ -27,18 +27,18 @@ const transformer = (data) => {
 export const DonutChart = ({
   width = 600,
   height = 600,
-  arcPaddingOnHover = 0.05,
-  pieOffsetOnHover = 0.2,
-  arcWidth = 40,
-  levelsInnerSpace = 2,
   data = [],
   labelStyle = "inside",
   explodePie = true,
   explodeDonut = true,
   pieName = "",
   holeSize = 30,
+  arcInnerGap = 0.025,
+  pieExplodeAngle = 0.2,
+  arcWidth = 40,
+  donutInnerGap = 2,
 }) => {
-  const levelsInnerSpaceOnHover = explodeDonut ? 8 : 2;
+  const donutInnerGapOnHover = explodeDonut ? 8 : 2;
   const innerHoleSize = pieName ? holeSize : 0;
   // TODO: Add Labels
   // TODO: Define Labels in apis data
@@ -66,13 +66,12 @@ export const DonutChart = ({
     innerRadius,
     outerRadius,
     isArcActive,
-    offsetAdjustment = 0,
-    labelEnd = outerRadius + 180,
+    anglesAdjustment = 0,
   }) => {
     const { startAngle, endAngle, padAngle } = parentArc;
-    const adjustedStart = startAngle + offsetAdjustment;
-    const adjustedEnd = endAngle - offsetAdjustment;
-    const adjustedPadAngle = isArcActive ? arcPaddingOnHover : padAngle;
+    const adjustedStart = startAngle + anglesAdjustment;
+    const adjustedEnd = endAngle - anglesAdjustment;
+    const adjustedPadAngle = isArcActive ? arcInnerGap : padAngle;
 
     const childPieGenerator = pie()
       .startAngle(adjustedStart)
@@ -102,21 +101,30 @@ export const DonutChart = ({
 
       const { index } = currentChildArc;
       const fill = colors(index);
-      const { children = [], label } = data[index];
+      const { children = [], label, value } = data[index];
+      console.log("child index", index, data);
 
       return (
         <>
           <g key={`${index}${label}`}>
             <path d={arcPath} fill={fill}></path>
           </g>
-          {labelStyle === "outside" && (
+          {labelStyle === "outside" && !children.length && (
             <g>
               <polyline stroke="black" points={linePoints}></polyline>
               <text
                 transform={`translate(${labelPosition})`}
                 textAnchor="middle"
               >
-                {data[index].label}
+                {label}
+              </text>
+              <text
+                transform={`translate(${labelPosition[0]},${
+                  labelPosition[1] + 15
+                })rotate(0)`}
+                textAnchor="middle"
+              >
+                ({value})
               </text>
             </g>
           )}
@@ -127,17 +135,17 @@ export const DonutChart = ({
                 textAnchor="middle"
                 fontSize={arcWidth / 4}
               >
-                {data[index].label}
+                {label}
               </text>
 
               <text
                 transform={`translate(${lineStart[0]},${
-                  lineStart[1] + 20
+                  lineStart[1] + 15
                 })rotate(0)`}
                 fontSize={arcWidth / 3}
                 textAnchor="middle"
               >
-                ({data[index].value})
+                ({value})
               </text>
             </>
           )}
@@ -147,12 +155,11 @@ export const DonutChart = ({
               parentArc: currentChildArc,
               isArcActive,
               innerRadius: isArcActive
-                ? outerRadius + levelsInnerSpaceOnHover
+                ? outerRadius + donutInnerGapOnHover
                 : outerRadius + 2,
               outerRadius: isArcActive
-                ? outerRadius + levelsInnerSpaceOnHover + arcWidth
+                ? outerRadius + donutInnerGapOnHover + arcWidth
                 : outerRadius + arcWidth,
-              labelEnd: labelEnd - arcWidth,
             })}
         </>
       );
@@ -171,12 +178,17 @@ export const DonutChart = ({
           {arcs.map((currentArc) => {
             const { index, startAngle, endAngle } = currentArc;
             const isArcActive = index === activeArc;
-            const arcStartAngle = isArcActive ? startAngle + 0.2 : startAngle;
-            const arcEndAngle = isArcActive ? endAngle - 0.2 : endAngle;
+            const arcStartAngle = isArcActive
+              ? startAngle + pieExplodeAngle
+              : startAngle;
+            const arcEndAngle = isArcActive
+              ? endAngle - pieExplodeAngle
+              : endAngle;
             const pieOuterRadius =
               explodePie && isArcActive
-                ? radius + levelsInnerSpaceOnHover + arcWidth
+                ? radius + donutInnerGapOnHover + arcWidth
                 : radius;
+            // we don't need to add arcWidth, I guess. It is only needed in child arcs
             const arcGenerator = arc()
               .innerRadius(innerHoleSize)
               .outerRadius(pieOuterRadius)
@@ -185,16 +197,19 @@ export const DonutChart = ({
 
             const pathDirection = arcGenerator(currentArc);
             const fill = colors(index);
-            const innerRadius = isArcActive
-              ? pieOuterRadius + levelsInnerSpaceOnHover
-              : pieOuterRadius + levelsInnerSpace;
-            const outerRadius = isArcActive
-              ? pieOuterRadius + levelsInnerSpaceOnHover + arcWidth
-              : pieOuterRadius + arcWidth;
-            const offsetAdjustment = isArcActive
-              ? pieOffsetOnHover - arcPaddingOnHover / 2
-              : 0;
             const pieLabelCoordinates = arcGenerator.centroid(currentArc);
+
+            // child Arc calculation
+            const innerRadius = isArcActive
+              ? pieOuterRadius + donutInnerGapOnHover
+              : pieOuterRadius + donutInnerGap;
+            const outerRadius = isArcActive
+              ? pieOuterRadius + donutInnerGapOnHover + arcWidth
+              : pieOuterRadius + arcWidth;
+            const anglesAdjustment = isArcActive
+              ? pieExplodeAngle - arcInnerGap / 2
+              : 0;
+
             return (
               <>
                 <g
@@ -206,13 +221,22 @@ export const DonutChart = ({
                     setActiveArc(null);
                   }}
                 >
-                  <path d={pathDirection} fill={fill}></path>{" "}
+                  <path d={pathDirection} fill={fill}></path>
                   <text
                     transform={`translate(${pieLabelCoordinates})`}
                     textAnchor="middle"
                     fontSize={14}
                   >
-                    {`${data[index].label} (${data[index].value})`}
+                    {`${data[index].label} `}
+                  </text>
+                  <text
+                    transform={`translate(${pieLabelCoordinates[0]},${
+                      pieLabelCoordinates[1] + 15
+                    })`}
+                    textAnchor="middle"
+                    fontSize={14}
+                  >
+                    {`(${data[index].value})`}
                   </text>
                 </g>
 
@@ -223,7 +247,7 @@ export const DonutChart = ({
                     isArcActive,
                     innerRadius,
                     outerRadius,
-                    offsetAdjustment,
+                    anglesAdjustment,
                   })}
               </>
             );
