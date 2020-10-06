@@ -20,6 +20,11 @@ const colorScheme = [
   "#FC803B",
 ];
 
+const getPercentage = (value, data) => {
+  const total = data.reduce((acc, current) => acc + current.value, 0);
+  return Math.round((value / total) * 100);
+};
+
 const transformer = (data) => {
   return data.map((dataPoint) => dataPoint.value);
 };
@@ -37,6 +42,7 @@ export const DonutChart = ({
   pieExplodeAngle = 0.2,
   arcWidth = 40,
   donutInnerGap = 2,
+  showPercentage = true,
 }) => {
   const donutInnerGapOnHover = explodeDonut ? 8 : 2;
   const innerHoleSize = pieName ? holeSize : 0;
@@ -102,7 +108,7 @@ export const DonutChart = ({
       const { index } = currentChildArc;
       const fill = colors(index);
       const { children = [], label, value } = data[index];
-      console.log("child index", index, data);
+      const percentage = getPercentage(value, data);
 
       return (
         <>
@@ -124,7 +130,7 @@ export const DonutChart = ({
                 })rotate(0)`}
                 textAnchor="middle"
               >
-                ({value})
+                ({showPercentage ? percentage : value}%)
               </text>
             </g>
           )}
@@ -145,7 +151,7 @@ export const DonutChart = ({
                 fontSize={arcWidth / 3}
                 textAnchor="middle"
               >
-                ({value})
+                ({showPercentage ? percentage : value}%)
               </text>
             </>
           )}
@@ -209,6 +215,8 @@ export const DonutChart = ({
             const anglesAdjustment = isArcActive
               ? pieExplodeAngle - arcInnerGap / 2
               : 0;
+            const { children = [], label, value } = data[index];
+            const percentage = getPercentage(value, data);
 
             return (
               <>
@@ -227,7 +235,7 @@ export const DonutChart = ({
                     textAnchor="middle"
                     fontSize={14}
                   >
-                    {`${data[index].label} `}
+                    {`${label} `}
                   </text>
                   <text
                     transform={`translate(${pieLabelCoordinates[0]},${
@@ -236,13 +244,13 @@ export const DonutChart = ({
                     textAnchor="middle"
                     fontSize={14}
                   >
-                    {`(${data[index].value})`}
+                    ({showPercentage ? percentage : value}%)
                   </text>
                 </g>
 
-                {data[index].children &&
+                {children &&
                   getChildArcs({
-                    data: data[index].children,
+                    data: children,
                     parentArc: currentArc,
                     isArcActive,
                     innerRadius,

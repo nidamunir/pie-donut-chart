@@ -13,6 +13,7 @@ function App() {
         arcWidth={35}
         labelStyle="inside"
         pieName="test"
+        showPercentage
       />
     </div>
   );
