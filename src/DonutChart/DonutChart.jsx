@@ -167,7 +167,7 @@ export const DonutChart = ({
         .outerRadius(outerRadius + 50);
       const labelTextArc = arc()
         .innerRadius(outerRadius)
-        .outerRadius(outerRadius + 80);
+        .outerRadius(outerRadius + 100);
       const lineStart = childArcGenerator.centroid(currentChildArc);
       const lineEnd = labelLineArc.centroid(currentChildArc);
       const labelPosition = labelTextArc.centroid(currentChildArc);
@@ -244,22 +244,23 @@ export const DonutChart = ({
             const isArcActive = index === activeArc;
             const arcStartAngle = isArcActive ? startAngle + 0.2 : startAngle;
             const arcEndAngle = isArcActive ? endAngle - 0.2 : endAngle;
-
+            const parentOuterRadius = isArcActive
+              ? radius + levelsInnerSpaceOnHover + arcWidth
+              : radius;
             const arcGenerator = arc()
               .innerRadius(innerHoleSize)
-              .outerRadius(radius)
+              .outerRadius(parentOuterRadius)
               .startAngle(arcStartAngle)
               .endAngle(arcEndAngle);
             const parentMidAngle = startAngle + (endAngle - startAngle) / 2;
-            console.log(parentMidAngle, data[index].label);
             const pathDirection = arcGenerator(currentArc);
             const fill = colors(index);
             const innerRadius = isArcActive
-              ? radius + levelsInnerSpaceOnHover
-              : radius + levelsInnerSpace;
+              ? parentOuterRadius + levelsInnerSpaceOnHover
+              : parentOuterRadius + levelsInnerSpace;
             const outerRadius = isArcActive
-              ? radius + levelsInnerSpaceOnHover + arcWidth
-              : radius + arcWidth;
+              ? parentOuterRadius + levelsInnerSpaceOnHover + arcWidth
+              : parentOuterRadius + arcWidth;
             const offsetAdjustment = isArcActive
               ? pieOffsetOnHover - arcPaddingOnHover / 2
               : 0;
