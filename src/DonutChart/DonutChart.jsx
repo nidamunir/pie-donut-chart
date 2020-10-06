@@ -25,16 +25,16 @@ const transformer = (data) => {
 };
 
 export const DonutChart = ({
-  width = 700,
-  height = 700,
-  innerHoleSize = 10,
+  width = 600,
+  height = 600,
+  innerHoleSize = 25,
   arcPaddingOnHover = 0.05,
   pieOffsetOnHover = 0.2,
   arcWidth = 40,
   levelsInnerSpaceOnHover = 8,
   levelsInnerSpace = 2,
   data = [],
-  levels = 1,
+  labelStyle = "inside",
 }) => {
   // TODO: Add Labels
   // TODO: Define Labels in apis data
@@ -46,9 +46,9 @@ export const DonutChart = ({
   // TODO: Add utils
 
   const colors = scaleOrdinal(colorScheme);
-  const updatedHeight = height - (levels * arcWidth + levelsInnerSpaceOnHover);
-  const updatedWidth = width - (levels * arcWidth + levelsInnerSpaceOnHover);
-  const radius = Math.min(updatedHeight, updatedWidth) / 4;
+  // const updatedHeight = height - (levels * arcWidth + levelsInnerSpaceOnHover);
+  // const updatedWidth = width - (levels * arcWidth + levelsInnerSpaceOnHover);
+  const radius = Math.min(height, width) / 5;
   const pieGenerator = pie().sort((a, b) => {
     return a - b;
   });
@@ -105,7 +105,7 @@ export const DonutChart = ({
           <g key={`${index}${label}`}>
             <path d={arcPath} fill={fill}></path>
           </g>
-          {!children.length && (
+          {labelStyle === "outside" && (
             <g>
               <polyline stroke="black" points={linePoints}></polyline>
               <text
@@ -116,7 +116,7 @@ export const DonutChart = ({
               </text>
             </g>
           )}
-          {children.length && (
+          {labelStyle === "inside" && (
             <>
               <text
                 transform={`translate(${lineStart})rotate(-0)`}
@@ -200,6 +200,7 @@ export const DonutChart = ({
                   <text
                     transform={`translate(${labelPosition})`}
                     textAnchor="middle"
+                    fontSize={14}
                   >
                     {`${data[index].label} (${data[index].value})`}
                   </text>

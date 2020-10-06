@@ -2,12 +2,13 @@ import React from "react";
 
 import "./App.css";
 import { DonutChart } from "./DonutChart/DonutChart";
-import data from "./datasets/dataset1";
+import dataset1 from "./datasets/dataset1";
+import dataset2 from "./datasets/dataset2";
 
 function App() {
   return (
     <div className="App" style={{ width: "1000px", height: "1000PX" }}>
-      <DonutChart data={data} arcWidth={30} levels={4} />
+      <DonutChart data={dataset2} arcWidth={35} labelStyle="inside" />
     </div>
   );
 }
