@@ -6,8 +6,8 @@ import data from "./datasets/dataset1";
 
 function App() {
   return (
-    <div className="App">
-      <DonutChart data={data} arcWidth={30} />
+    <div className="App" style={{ width: "1000px", height: "1000PX" }}>
+      <DonutChart data={data} arcWidth={30} levels={4} />
     </div>
   );
 }

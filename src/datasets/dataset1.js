@@ -32,16 +32,6 @@ export default [
               {
                 value: 40,
                 label: "P13Ch1",
-                children: [
-                  {
-                    value: 20,
-                    label: "P1L4Ch1",
-                  },
-                  {
-                    value: 20,
-                    label: "P1L4Ch2",
-                  },
-                ],
               },
               {
                 value: 10,

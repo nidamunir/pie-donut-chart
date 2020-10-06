@@ -25,15 +25,16 @@ const transformer = (data) => {
 };
 
 export const DonutChart = ({
-  width = 900,
-  height = 690,
-  innerHoleSize = 30,
+  width = 700,
+  height = 700,
+  innerHoleSize = 10,
   arcPaddingOnHover = 0.05,
   pieOffsetOnHover = 0.2,
   arcWidth = 40,
-  levelsInnerSpaceOnHover = 10,
+  levelsInnerSpaceOnHover = 8,
   levelsInnerSpace = 2,
   data = [],
+  levels = 1,
 }) => {
   // TODO: Add Labels
   // TODO: Define Labels in apis data
@@ -45,7 +46,9 @@ export const DonutChart = ({
   // TODO: Add utils
 
   const colors = scaleOrdinal(colorScheme);
-  const radius = Math.min(width, height) / 4;
+  const updatedHeight = height - (levels * arcWidth + levelsInnerSpaceOnHover);
+  const updatedWidth = width - (levels * arcWidth + levelsInnerSpaceOnHover);
+  const radius = Math.min(updatedHeight, updatedWidth) / 4;
   const pieGenerator = pie().sort((a, b) => {
     return a - b;
   });
@@ -155,10 +158,7 @@ export const DonutChart = ({
   return (
     <div>
       <svg width={width} height={height}>
-        <g
-          className="wrapper"
-          transform={`translate(${width / 2},${height / 2})`}
-        >
+        <g transform={`translate(${width / 2},${height / 2})`}>
           {arcs.map((currentArc) => {
             const { index, startAngle, endAngle } = currentArc;
             const isArcActive = index === activeArc;
@@ -172,7 +172,7 @@ export const DonutChart = ({
               .outerRadius(parentOuterRadius)
               .startAngle(arcStartAngle)
               .endAngle(arcEndAngle);
-            const parentMidAngle = startAngle + (endAngle - startAngle) / 2;
+
             const pathDirection = arcGenerator(currentArc);
             const fill = colors(index);
             const innerRadius = isArcActive
@@ -213,7 +213,6 @@ export const DonutChart = ({
                     innerRadius,
                     outerRadius,
                     offsetAdjustment,
-                    parentMidAngle,
                   })}
               </>
             );
