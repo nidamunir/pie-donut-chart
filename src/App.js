@@ -4,12 +4,13 @@ import "./App.css";
 import { DonutChart } from "./DonutChart/DonutChart";
 import dataset1 from "./datasets/dataset1";
 import dataset2 from "./datasets/dataset2";
+import dataset3 from "./datasets/dataset3";
 
 function App() {
   return (
-    <div className="App" style={{ width: "1000px", height: "1000PX" }}>
+    <div className="App">
       <DonutChart
-        data={dataset2}
+        data={dataset3}
         arcWidth={35}
         labelStyle="inside"
         pieName="test"

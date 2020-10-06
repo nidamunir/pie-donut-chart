@@ -5,9 +5,6 @@ import { scaleOrdinal } from "d3-scale";
 const colorScheme = [
   "#4daf4a",
   "#377eb8",
-  "#ff7f00",
-  "#984ea3",
-  "#e41a1c",
   "#ffb822",
   "#00bf8c",
   "#219ddb",
@@ -28,6 +25,20 @@ const getPercentage = (value, data) => {
 const transformer = (data) => {
   return data.map((dataPoint) => dataPoint.value);
 };
+
+function adjust(color, amount) {
+  return (
+    "#" +
+    color
+      .replace(/^#/, "")
+      .replace(/../g, (color) =>
+        (
+          "0" +
+          Math.min(255, Math.max(0, parseInt(color, 16) + amount)).toString(16)
+        ).substr(-2)
+      )
+  );
+}
 
 export const DonutChart = ({
   width = 600,
@@ -73,12 +84,13 @@ export const DonutChart = ({
     outerRadius,
     isArcActive,
     anglesAdjustment = 0,
+    color = "#000",
   }) => {
     const { startAngle, endAngle, padAngle } = parentArc;
     const adjustedStart = startAngle + anglesAdjustment;
     const adjustedEnd = endAngle - anglesAdjustment;
     const adjustedPadAngle = isArcActive ? arcInnerGap : padAngle;
-
+    let colorAmount = 0;
     const childPieGenerator = pie()
       .startAngle(adjustedStart)
       .endAngle(adjustedEnd)
@@ -106,14 +118,17 @@ export const DonutChart = ({
       const linePoints = [lineStart, lineEnd];
 
       const { index } = currentChildArc;
-      const fill = colors(index);
+
+      const fill = adjust(color, colorAmount);
+      colorAmount += 30;
+      console.log("index", index, -colorAmount);
       const { children = [], label, value } = data[index];
       const percentage = getPercentage(value, data);
 
       return (
         <>
           <g key={`${index}${label}`}>
-            <path d={arcPath} fill={fill}></path>
+            <path d={arcPath} fill={fill} opacity={0.8}></path>
           </g>
           {labelStyle === "outside" && !children.length && (
             <g>
@@ -166,6 +181,7 @@ export const DonutChart = ({
               outerRadius: isArcActive
                 ? outerRadius + donutInnerGapOnHover + arcWidth
                 : outerRadius + arcWidth,
+              color: fill,
             })}
         </>
       );
@@ -202,7 +218,7 @@ export const DonutChart = ({
               .endAngle(arcEndAngle);
 
             const pathDirection = arcGenerator(currentArc);
-            const fill = colors(index);
+            const fill = adjust(colors(index), -20);
             const pieLabelCoordinates = arcGenerator.centroid(currentArc);
 
             // child Arc calculation
@@ -256,6 +272,7 @@ export const DonutChart = ({
                     innerRadius,
                     outerRadius,
                     anglesAdjustment,
+                    color: fill,
                   })}
               </>
             );
