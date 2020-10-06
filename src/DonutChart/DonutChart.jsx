@@ -1,41 +1,7 @@
 import React, { useState } from "react";
 import { pie, arc } from "d3-shape";
 import { scaleOrdinal } from "d3-scale";
-
-const colorScheme = [
-  "#ffb822",
-  "#00bf8c",
-  // "#ad85cc",
-  // "#f95275",
-  // "#80B647",
-  // "#11AEB4",
-  // "#6791D4",
-  // "#D36CA1",
-  "#FC803B",
-];
-
-const getPercentage = (value, data) => {
-  const total = data.reduce((acc, current) => acc + current.value, 0);
-  return Math.round((value / total) * 100);
-};
-
-const transformer = (data) => {
-  return data.map((dataPoint) => dataPoint.value);
-};
-
-function adjust(color, amount) {
-  return (
-    "#" +
-    color
-      .replace(/^#/, "")
-      .replace(/../g, (color) =>
-        (
-          "0" +
-          Math.min(255, Math.max(0, parseInt(color, 16) + amount)).toString(16)
-        ).substr(-2)
-      )
-  );
-}
+import { adjustColor, getPercentage, transformer, colorScheme } from "./utils";
 
 export const DonutChart = ({
   width = 600,
@@ -99,7 +65,7 @@ export const DonutChart = ({
 
     return childArcs.map((currentChildArc) => {
       const { index } = currentChildArc;
-      const fill = adjust(color, colorAmount);
+      const fill = adjustColor(color, colorAmount);
       colorAmount += 30;
       const { children = [], label, value } = data[index];
       const percentage = getPercentage(value, data);
@@ -213,7 +179,7 @@ export const DonutChart = ({
               .endAngle(arcEndAngle);
 
             const pathDirection = arcGenerator(currentArc);
-            const fill = adjust(colors(index), -80);
+            const fill = adjustColor(colors(index), -80);
             const pieLabelCoordinates = arcGenerator.centroid(currentArc);
 
             // child Arc calculation
