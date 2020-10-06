@@ -247,6 +247,7 @@ export const DonutChart = ({
                     transform={`translate(${pieLabelCoordinates})`}
                     textAnchor="middle"
                     fontSize={14}
+                    fill="#fff"
                   >
                     {`${label} `}
                   </text>
@@ -255,6 +256,7 @@ export const DonutChart = ({
                       pieLabelCoordinates[1] + 15
                     })`}
                     textAnchor="middle"
+                    fill="#fff"
                     fontSize={14}
                   >
                     ({showPercentage ? percentage : value}%)
