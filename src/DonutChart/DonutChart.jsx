@@ -1,88 +1,7 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { pie, arc } from "d3-shape";
 import { scaleOrdinal } from "d3-scale";
 
-const level5Child1 = [
-  {
-    value: 20,
-    label: "Ch4 L1",
-  },
-  {
-    value: 20,
-    label: "Ch2 L2",
-  },
-];
-
-const level3Child1 = [
-  {
-    value: 40,
-    label: "Lev3 L1*",
-    children: level5Child1,
-  },
-  {
-    value: 10,
-    label: "Lev3 L2*",
-  },
-];
-const level2Child1 = [
-  {
-    value: 4,
-    label: "Lev2Ch1",
-  },
-
-  {
-    value: 6,
-    label: "Lev2Ch2",
-    children: level3Child1,
-  },
-];
-
-const level1Ch1 = [
-  {
-    value: 5,
-    label: "Lev1 C1",
-  },
-
-  {
-    value: 5,
-    label: "Lev1 C2",
-  },
-  {
-    value: 50,
-    label: "Lev1 C3",
-    children: level2Child1,
-  },
-];
-
-const level1Ch2 = [
-  {
-    value: 5,
-    label: "Lev1Ch1",
-  },
-
-  {
-    value: 5,
-    label: "Lev1Ch2",
-  },
-  {
-    value: 10,
-    label: "Lev1Ch3",
-    children: level3Child1,
-  },
-];
-const data = [
-  {
-    value: 40,
-    label: "Parent0",
-    children: level1Ch2,
-  },
-
-  {
-    value: 60,
-    label: "Parent2",
-    children: level1Ch1,
-  },
-];
 const colorScheme = [
   "#4daf4a",
   "#377eb8",
@@ -114,6 +33,7 @@ export const DonutChart = ({
   arcWidth = 40,
   levelsInnerSpaceOnHover = 10,
   levelsInnerSpace = 2,
+  data = [],
 }) => {
   // TODO: Add Labels
   // TODO: Define Labels in apis data
