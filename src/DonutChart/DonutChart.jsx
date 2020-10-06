@@ -5,82 +5,82 @@ import { scaleOrdinal } from "d3-scale";
 const level5Child1 = [
   {
     value: 20,
-    label: "Label1",
+    label: "Ch4 L1",
   },
   {
     value: 20,
-    label: "Label1",
+    label: "Ch2 L2",
   },
 ];
 
-const level4Child1 = [
+const level3Child1 = [
   {
     value: 40,
-    label: "Label1",
+    label: "Lev3 L1*",
     children: level5Child1,
   },
   {
     value: 10,
-    label: "Label1",
+    label: "Lev3 L2*",
   },
 ];
-const level3Child1 = [
+const level2Child1 = [
   {
     value: 4,
-    label: "Level 2 child 0",
+    label: "Lev2Ch1",
   },
 
   {
     value: 6,
-    label: "Level 2 child 1",
-    children: level4Child1,
+    label: "Lev2Ch2",
+    children: level3Child1,
   },
 ];
 
-const level2Child1 = [
+const level1Ch1 = [
   {
     value: 5,
-    label: "Level1Child0",
+    label: "Lev1 C1",
   },
 
   {
     value: 5,
-    label: "Level1Child1",
+    label: "Lev1 C2",
   },
   {
     value: 50,
-    label: "Level1Child2",
-    children: level4Child1,
+    label: "Lev1 C3",
+    children: level2Child1,
   },
 ];
 
-const level2Child2 = [
+const level1Ch2 = [
   {
     value: 5,
-    label: "Level1Child0",
+    label: "Lev1Ch1",
   },
 
   {
     value: 5,
-    label: "Level1Child1",
+    label: "Lev1Ch2",
   },
   {
     value: 10,
-    label: "Level1Child2",
-    children: level4Child1,
+    label: "Lev1Ch3",
+    children: level3Child1,
   },
 ];
 const data = [
   {
     value: 40,
     label: "Parent0",
-    children: level2Child2,
+    children: level1Ch2,
   },
 
   {
     value: 60,
     label: "Parent2",
-    children: level2Child1,
+    children: level1Ch1,
   },
 ];
 const colorScheme = [
@@ -106,12 +106,12 @@ const transformer = (data) => {
 };
 
 export const DonutChart = ({
-  width = 500,
-  height = 500,
-  innerHoleSize = 50,
+  width = 900,
+  height = 690,
+  innerHoleSize = 30,
   arcPaddingOnHover = 0.05,
   pieOffsetOnHover = 0.2,
-  arcWidth = 20,
+  arcWidth = 40,
   levelsInnerSpaceOnHover = 10,
   levelsInnerSpace = 2,
 }) => {
@@ -132,7 +132,6 @@ export const DonutChart = ({
 
   const arcs = pieGenerator(transformer(data));
   const [activeArc, setActiveArc] = useState(null);
-  const [activeLabel, setActiveLabel] = useState(null);
 
   const getChildArcs = ({
     parentArc,
@@ -141,6 +140,7 @@ export const DonutChart = ({
     outerRadius,
     isArcActive,
     offsetAdjustment = 0,
+    labelEnd = outerRadius + 180,
   }) => {
     const { startAngle, endAngle, padAngle } = parentArc;
     const adjustedStart = startAngle + offsetAdjustment;
@@ -162,23 +162,58 @@ export const DonutChart = ({
         .outerRadius(outerRadius);
       const arcPath = childArcGenerator(currentChildArc);
 
+      const labelLineArc = arc()
+        .innerRadius(outerRadius)
+        .outerRadius(outerRadius + 50);
+      const labelTextArc = arc()
+        .innerRadius(outerRadius)
+        .outerRadius(outerRadius + 80);
+      const lineStart = childArcGenerator.centroid(currentChildArc);
+      const lineEnd = labelLineArc.centroid(currentChildArc);
+      const labelPosition = labelTextArc.centroid(currentChildArc);
+      const linePoints = [lineStart, lineEnd];
+
       const { index } = currentChildArc;
       const fill = colors(index);
       const { children = [], label } = data[index];
 
       return (
         <>
-          <g
-            key={`${index}${label}`}
-            // onMouseEnter={() => {
-            //   setActiveLabel(data[index].value);
-            // }}
-            // onMouseOut={() => {
-            //   setActiveLabel(null);
-            // }}
-          >
+          <g key={`${index}${label}`}>
             <path d={arcPath} fill={fill}></path>
           </g>
+          {!children.length && (
+            <g>
+              <polyline stroke="black" points={linePoints}></polyline>
+              <text
+                transform={`translate(${labelPosition})`}
+                textAnchor="middle"
+              >
+                {data[index].label}
+              </text>
+            </g>
+          )}
+          {children.length && (
+            <>
+              <text
+                transform={`translate(${lineStart})rotate(-0)`}
+                textAnchor="middle"
+                fontSize={arcWidth / 4}
+              >
+                {data[index].label}
+              </text>
+
+              <text
+                transform={`translate(${lineStart[0]},${
+                  lineStart[1] + 20
+                })rotate(0)`}
+                fontSize={arcWidth / 3}
+                textAnchor="middle"
+              >
+                ({data[index].value})
+              </text>
+            </>
+          )}
           {children &&
             getChildArcs({
               data: children,
@@ -190,6 +225,7 @@ export const DonutChart = ({
               outerRadius: isArcActive
                 ? outerRadius + levelsInnerSpaceOnHover + arcWidth
                 : outerRadius + arcWidth,
+              labelEnd: labelEnd - arcWidth,
             })}
         </>
       );
@@ -198,7 +234,6 @@ export const DonutChart = ({
 
   return (
     <div>
-      {/* <h3>{activeLabel}</h3> */}
       <svg width={width} height={height}>
         <g
           className="wrapper"
@@ -215,7 +250,8 @@ export const DonutChart = ({
               .outerRadius(radius)
               .startAngle(arcStartAngle)
               .endAngle(arcEndAngle);
-
+            const parentMidAngle = startAngle + (endAngle - startAngle) / 2;
+            console.log(parentMidAngle, data[index].label);
             const pathDirection = arcGenerator(currentArc);
             const fill = colors(index);
             const innerRadius = isArcActive
@@ -227,21 +263,25 @@ export const DonutChart = ({
             const offsetAdjustment = isArcActive
               ? pieOffsetOnHover - arcPaddingOnHover / 2
               : 0;
-
+            const labelPosition = arcGenerator.centroid(currentArc);
             return (
               <>
                 <g
                   key={`${currentArc.index}`}
                   onMouseEnter={() => {
                     setActiveArc(index);
-                    setActiveLabel(data[index].label);
                   }}
                   onMouseOut={() => {
                     setActiveArc(null);
-                    setActiveLabel(null);
                   }}
                 >
-                  <path d={pathDirection} fill={fill}></path>
+                  <path d={pathDirection} fill={fill}></path>{" "}
+                  <text
+                    transform={`translate(${labelPosition})`}
+                    textAnchor="middle"
+                  >
+                    {`${data[index].label} (${data[index].value})`}
+                  </text>
                 </g>
 
                 {data[index].children &&
@@ -252,6 +292,7 @@ export const DonutChart = ({
                     innerRadius,
                     outerRadius,
                     offsetAdjustment,
+                    parentMidAngle,
                   })}
               </>
             );
