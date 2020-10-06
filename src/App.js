@@ -8,7 +8,14 @@ import dataset2 from "./datasets/dataset2";
 function App() {
   return (
     <div className="App" style={{ width: "1000px", height: "1000PX" }}>
-      <DonutChart data={dataset2} arcWidth={35} labelStyle="inside" />
+      <DonutChart
+        data={dataset2}
+        arcWidth={35}
+        labelStyle="inside"
+        explodePie={false}
+        pieName="test"
+        explodeDonut={true}
+      />
     </div>
   );
 }
