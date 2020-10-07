@@ -20,16 +20,6 @@ export const DonutChart = ({
 }) => {
   const donutInnerGapOnHover = explodeDonut ? 8 : 2;
   const innerHoleSize = pieName ? holeSize : 0;
-  // TODO: Add Labels
-  // TODO: Colors scheme
-  // TODO: Improve names
-  // TODO: Add Legends
-  // TODO: Move data to datasets folder
-  // TODO: Add utils
-  // TODO: fix percenta sign
-  // TODO: remove opacity
-  // TODO: fix radius calculation
-  //
 
   const colors = scaleOrdinal(colorScheme);
   const radius = Math.min(height, width) / 4;
